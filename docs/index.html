@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wallpapers</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+
+    h1 { margin-bottom: 2rem; font-size: 1.8rem; }
+
+    h2 {
+      text-transform: capitalize;
+      margin: 2rem 0 1rem;
+      font-size: 1.2rem;
+      color: #aaa;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #222;
+      cursor: pointer;
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s;
+    }
+
+    .card:hover img { transform: scale(1.03); }
+
+    .card a.download {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      text-align: center;
+      padding: 0.5rem;
+      text-decoration: none;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover a.download { opacity: 1; }
+
+    #error { color: tomato; margin-top: 2rem; }
+
+    details {
+      margin-top: 1.5rem;
+      border-bottom: 1px solid #333;
+      padding-bottom: 1rem;
+    }
+
+    summary {
+      text-transform: capitalize;
+      font-size: 1.2rem;
+      color: #aaa;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      user-select: none;
+    }
+
+    summary:hover { color: #eee; }
+  </style>
+</head>
+<body>
+
+  <h1>🖼 Wallpapers</h1>
+  <div id="gallery"></div>
+  <p id="error"></p>
+
+  <script>
+    const REPO = "sunworms/walls";
+
+    async function load() {
+      let manifest;
+      try {
+        const res = await fetch("manifest.json");
+        manifest = await res.json();
+      } catch {
+        document.getElementById("error").textContent =
+          "Could not load manifest.json.";
+        return;
+      }
+
+      const gallery = document.getElementById("gallery");
+
+      for (const [folder, files] of Object.entries(manifest)) {
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
+        summary.textContent = folder;
+        details.appendChild(summary);
+      
+        const grid = document.createElement("div");
+        grid.className = "grid";
+      
+        for (const file of files) {
+          const rawUrl = `https://raw.githubusercontent.com/${REPO}/main/${folder}/${encodeURIComponent(file)}`;
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${rawUrl}" alt="${file}" loading="lazy" />
+            <a class="download" href="${rawUrl}" download="${file}">⬇ Download</a>
+          `;
+          grid.appendChild(card);
+        }
+      
+        details.appendChild(grid);
+        gallery.appendChild(details);
+      }
+
+      gallery.addEventListener("toggle", (e) => {
+        if (e.target.tagName !== "DETAILS" || !e.target.open) return;
+        gallery.querySelectorAll("details[open]").forEach(d => {
+          if (d !== e.target) d.removeAttribute("open");
+        });
+      }, true);
+    }
+
+    load();
+  </script>
+
+</body>
+</html>
