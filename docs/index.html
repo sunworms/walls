@@ -116,7 +116,7 @@
         grid.className = "grid";
       
         for (const file of files) {
-          const rawUrl = `https://raw.githubusercontent.com/${REPO}/main/${folder}/${encodeURIComponent(file)}`;
+          const rawUrl = `https://media.githubusercontent.com/media/${REPO}/main/${folder}/${encodeURIComponent(file)}`;
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
